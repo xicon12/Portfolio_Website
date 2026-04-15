@@ -1,15 +1,9 @@
-# Ignore everything by default
+# Ignore literally everything
 *
 
-# Don't ignore directories (so we can traverse them)
+# Don't ignore directories
 !*/
 
-# Keep essential website files
+# Keep ONLY the index and gitignore
 !index.html
-!*.png
-
-# Keep gitignore
 !.gitignore
-
-# Specifically ignore unused images/assets
-education.png
