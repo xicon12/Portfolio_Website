@@ -1035,12 +1035,49 @@
 
         /* Mobile Devices */
         @media (max-width: 768px) {
+            html { scroll-behavior: auto; }
             p { font-size: 1.15rem; line-height: 1.6; }
             .logo { left: 50%; transform: translateX(-50%); top: 10px; margin: 0 auto; display: block; position: fixed; }
             .logo img { height: 26px !important; }
             .nav-pill { left: 50%; right: auto; transform: translateX(-50%); top: 56px; padding: 6px; }
             .nav-pill a { padding: 8px 12px; font-size: 9px; letter-spacing: 0.1em; }
             .nav-divider { width: 24px; }
+
+            .ambient-orb,
+            .mouse-spotlight,
+            .vignette,
+            .film-grain,
+            #particles-canvas {
+                display: none;
+            }
+
+            .nav-pill a,
+            .hero-badge,
+            .hero h1,
+            .hero-sub,
+            .hero-links,
+            .scroll-indicator,
+            .orb,
+            .skill-tag,
+            .project-item,
+            .project-info h3,
+            .project-desc,
+            .edu-card,
+            .contact-email,
+            .social-link,
+            .shimmer-border::after,
+            .nav-divider::after,
+            .scroll-line::after {
+                animation: none !important;
+                transition: none !important;
+            }
+
+            .reveal,
+            .reveal.visible {
+                opacity: 1;
+                transform: none;
+                transition: none !important;
+            }
 
             .hero {
                 height: auto;
@@ -1418,6 +1455,8 @@
             el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
         });
 
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
         // ===== Hero parallax fade on scroll =====
         const heroContent = document.querySelector('.hero-fade');
         if (heroContent) {
@@ -1436,6 +1475,10 @@
         let particles = [];
         let w, h;
 
+        if (isMobile) {
+            canvas.style.display = 'none';
+        }
+
         function resize() {
             w = canvas.width = window.innerWidth;
             h = canvas.height = window.innerHeight;
@@ -1443,101 +1486,108 @@
         resize();
         window.addEventListener('resize', resize);
 
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * w;
-                this.y = Math.random() * h;
-                this.size = Math.random() * 2.5 + 0.3;
-                this.speedX = (Math.random() - 0.5) * 0.25;
-                this.speedY = (Math.random() - 0.5) * 0.25;
-                this.baseOpacity = Math.random() * 0.35 + 0.08;
-                this.opacity = this.baseOpacity;
-                // Iridescent hue spread: cyan, blue, purple, green
-                const huePool = [190, 210, 230, 270, 290, 100];
-                this.hue = huePool[Math.floor(Math.random() * huePool.length)] + Math.random() * 20 - 10;
-                this.saturation = 60 + Math.random() * 30;
-                this.lightness = 60 + Math.random() * 20;
-                this.pulseSpeed = Math.random() * 0.02 + 0.005;
-                this.pulseOffset = Math.random() * Math.PI * 2;
-            }
-            update(time) {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x < 0 || this.x > w) this.speedX *= -1;
-                if (this.y < 0 || this.y > h) this.speedY *= -1;
-
-                // Gentle pulsing
-                this.opacity = this.baseOpacity + Math.sin(time * this.pulseSpeed + this.pulseOffset) * 0.1;
-
-                // Mouse interaction — particles flee
-                const dx = mouseX - this.x;
-                const dy = mouseY - this.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 180) {
-                    const force = (180 - dist) / 180;
-                    this.x -= dx * 0.01 * force;
-                    this.y -= dy * 0.01 * force;
-                    this.opacity = Math.min(this.opacity + 0.15 * force, 0.8);
+        if (!isMobile) {
+            class Particle {
+                constructor() {
+                    this.reset();
                 }
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity})`;
-                ctx.fill();
-            }
-        }
+                reset() {
+                    this.x = Math.random() * w;
+                    this.y = Math.random() * h;
+                    this.size = Math.random() * 2.5 + 0.3;
+                    this.speedX = (Math.random() - 0.5) * 0.25;
+                    this.speedY = (Math.random() - 0.5) * 0.25;
+                    this.baseOpacity = Math.random() * 0.35 + 0.08;
+                    this.opacity = this.baseOpacity;
+                    // Iridescent hue spread: cyan, blue, purple, green
+                    const huePool = [190, 210, 230, 270, 290, 100];
+                    this.hue = huePool[Math.floor(Math.random() * huePool.length)] + Math.random() * 20 - 10;
+                    this.saturation = 60 + Math.random() * 30;
+                    this.lightness = 60 + Math.random() * 20;
+                    this.pulseSpeed = Math.random() * 0.02 + 0.005;
+                    this.pulseOffset = Math.random() * Math.PI * 2;
+                }
+                update(time) {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    if (this.x < 0 || this.x > w) this.speedX *= -1;
+                    if (this.y < 0 || this.y > h) this.speedY *= -1;
 
-        // More particles for richness
-        const pCount = Math.min(180, Math.floor((w * h) / 8000));
-        for (let i = 0; i < pCount; i++) {
-            particles.push(new Particle());
-        }
+                    // Gentle pulsing
+                    this.opacity = this.baseOpacity + Math.sin(time * this.pulseSpeed + this.pulseOffset) * 0.1;
 
-        let frameTime = 0;
-        function animateParticles() {
-            frameTime++;
-            ctx.clearRect(0, 0, w, h);
-            particles.forEach(p => {
-                p.update(frameTime);
-                p.draw();
-            });
-
-            // Draw connections with iridescent stroke
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
+                    // Mouse interaction — particles flee
+                    const dx = mouseX - this.x;
+                    const dy = mouseY - this.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 140) {
-                        const alpha = 0.06 * (1 - dist / 140);
-                        ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `hsla(${(particles[i].hue + particles[j].hue) / 2}, 60%, 65%, ${alpha})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
+                    if (dist < 180) {
+                        const force = (180 - dist) / 180;
+                        this.x -= dx * 0.01 * force;
+                        this.y -= dy * 0.01 * force;
+                        this.opacity = Math.min(this.opacity + 0.15 * force, 0.8);
                     }
                 }
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fillStyle = `hsla(${this.hue}, ${this.saturation}%, ${this.lightness}%, ${this.opacity})`;
+                    ctx.fill();
+                }
             }
-            requestAnimationFrame(animateParticles);
+
+            // More particles for richness
+            const pCount = Math.min(180, Math.floor((w * h) / 8000));
+            for (let i = 0; i < pCount; i++) {
+                particles.push(new Particle());
+            }
+
+            let frameTime = 0;
+            function animateParticles() {
+                frameTime++;
+                ctx.clearRect(0, 0, w, h);
+                particles.forEach(p => {
+                    p.update(frameTime);
+                    p.draw();
+                });
+
+                // Draw connections with iridescent stroke
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 140) {
+                            const alpha = 0.06 * (1 - dist / 140);
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `hsla(${(particles[i].hue + particles[j].hue) / 2}, 60%, 65%, ${alpha})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+                }
+                requestAnimationFrame(animateParticles);
+            }
+            animateParticles();
         }
-        animateParticles();
 
         // ===== Scroll Reveal with stagger =====
         const reveals = document.querySelectorAll('.reveal');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
 
-        reveals.forEach(el => observer.observe(el));
+        if (!isMobile) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.08, rootMargin: '0px 0px -50px 0px' });
+
+            reveals.forEach(el => observer.observe(el));
+        } else {
+            reveals.forEach(el => el.classList.add('visible'));
+        }
 
         // ===== Active Nav =====
         const sections = document.querySelectorAll('section[id]');
@@ -1565,7 +1615,7 @@
                 e.preventDefault();
                 const target = document.querySelector(link.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
+                    target.scrollIntoView({ behavior: isMobile ? 'auto' : 'smooth' });
                 }
             });
         });
