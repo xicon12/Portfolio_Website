@@ -1,8 +1,0 @@
-Chessmaster
-https://github.com/xicon12/ChessMaster
-NuGames
-https://github.com/xicon12/NuGames
-NuQuizzer
-https://github.com/xicon12/NuQuizzer
-Custom Shell
-https://github.com/xicon12/Custom_Shell
